@@ -240,6 +240,7 @@ void ChessPlayer::setClaimsValidated(bool validate)
 
 void ChessPlayer::claimResult(const Chess::Result& result)
 {
+	qDebug() << __FUNCSIG__;
 	if (m_claimedResult)
 		return;
 

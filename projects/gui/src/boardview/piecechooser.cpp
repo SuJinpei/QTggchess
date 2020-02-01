@@ -49,7 +49,7 @@ void PieceChooser::paint(QPainter* painter,
 	painter->setBrush(QColor(Qt::white));
 
 	QPen pen(painter->pen());
-	pen.setWidth(3);
+	pen.setWidth(5 );
 	painter->setPen(pen);
 
 	painter->drawRoundedRect(m_rect, 10.0, 10.0);

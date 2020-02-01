@@ -59,6 +59,8 @@
 #include "evalwidget.h"
 #include "boardview/boardscene.h"
 #include "tournamentresultsdlg.h"
+#include "enginebuilder.h"
+#include "TianTianPlayerBuilder.h"
 
 #include <pgnstream.h>
 #include <pgngameentry.h>
@@ -138,6 +140,8 @@ MainWindow::MainWindow(ChessGame* game)
 
 	readSettings();
 	addGame(game);
+
+    updateView();
 }
 
 MainWindow::~MainWindow()
@@ -146,6 +150,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::createActions()
 {
+	m_newTianTianGameAct = new QAction(tr("&连线天天"), this);
+
 	m_newGameAct = new QAction(tr("&新建对局..."), this);
 	m_newGameAct->setShortcut(QKeySequence::New);
 
@@ -177,6 +183,7 @@ void MainWindow::createActions()
 	m_copyPgnAct = new QAction(tr("&复制 PGN"), this);
 
 	m_flipBoardAct = new QAction(tr("&上下翻转棋盘"), this);
+    m_updateView = new QAction(tr("&更新界面"), this);
 
 	m_adjudicateDrawAct = new QAction(tr("&判定和棋"), this);
 	m_adjudicateWhiteWinAct = new QAction(tr("判定红胜"), this);
@@ -223,6 +230,7 @@ void MainWindow::createActions()
 	m_aboutAct = new QAction(tr("&关于佳佳界面..."), this);
 	m_aboutAct->setMenuRole(QAction::AboutRole);
 
+	connect(m_newTianTianGameAct, SIGNAL(triggered()), this, SLOT(newTianTianGame()));
 	connect(m_newGameAct, SIGNAL(triggered()), this, SLOT(newGame()));
 	
 	connect(m_openPgnAct, SIGNAL(triggered()), this, SLOT(OpenPgnGame()));
@@ -233,6 +241,7 @@ void MainWindow::createActions()
 	connect(m_copyPgnAct, SIGNAL(triggered()), this, SLOT(copyPgn()));
 	connect(m_flipBoardAct, SIGNAL(triggered()),
 		m_gameViewer->boardScene(), SLOT(flip()));
+    connect(m_updateView, SIGNAL(triggered()), this, SLOT(updateView()));
 	connect(m_closeGameAct, &QAction::triggered, this, [=]()
 	{
 		auto focusWindow = CuteChessApplication::activeWindow();
@@ -292,6 +301,7 @@ void MainWindow::createActions()
 void MainWindow::createMenus()
 {
 	m_gameMenu = menuBar()->addMenu(tr("&游戏"));
+	m_gameMenu->addAction(m_newTianTianGameAct);
 	m_gameMenu->addAction(m_newGameAct);
 	m_gameMenu->addAction(m_openPgnAct);
 	m_gameMenu->addSeparator();
@@ -323,6 +333,7 @@ void MainWindow::createMenus()
 
 	m_viewMenu = menuBar()->addMenu(tr("&视图"));
 	m_viewMenu->addAction(m_flipBoardAct);
+    m_viewMenu->addAction(m_updateView);
 	m_viewMenu->addSeparator();
 
 	m_windowMenu = menuBar()->addMenu(tr("&窗口"));
@@ -810,6 +821,42 @@ void MainWindow::closeTab(int index)
 void MainWindow::closeCurrentGame()
 {
 	closeTab(m_tabBar->currentIndex());
+}
+
+void MainWindow::newTianTianGame()
+{
+	qDebug() << __FUNCSIG__;
+	auto board = Chess::BoardFactory::create("standard");
+	auto pgn = new PgnGame();
+	pgn->setSite(QSettings().value("pgn/site").toString());
+	auto game = new ChessGame(board, pgn);
+
+	static TimeControl timectl("160/10:0");
+	game->setTimeControl(timectl);
+
+	EngineConfiguration enginecfg = CuteChessApplication::instance()->engineManager()->engineAt(0);
+	//enginecfg.setPondering(true);
+	PlayerBuilder* enginBuilder = new EngineBuilder(enginecfg);
+	static TianTianPlayerBuilder* tianTianBuilder = nullptr;
+	if ( !tianTianBuilder )
+		tianTianBuilder = new TianTianPlayerBuilder();
+	//HumanBuilder* humanBuilder = new HumanBuilder();
+	// Start the game in a new tab
+	connect(game, SIGNAL(initialized(ChessGame*)),
+		this, SLOT(addGame(ChessGame*)));
+	connect(game, SIGNAL(startFailed(ChessGame*)),
+		this, SLOT(onGameStartFailed(ChessGame*)));
+
+	if (tianTianBuilder->connecotor()->isReady()) {
+		if (tianTianBuilder->connecotor()->side())
+			CuteChessApplication::instance()->gameManager()->newGame(game,
+				tianTianBuilder, enginBuilder);
+		else
+			CuteChessApplication::instance()->gameManager()->newGame(game,
+				enginBuilder, tianTianBuilder);
+	}
+
+	//CuteChessApplication::instance()->gameManager()->newGame(game, enginBuilder, humanBuilder);
 }
 
 void MainWindow::newGame()
@@ -1404,6 +1451,16 @@ void MainWindow::resignGame()
 				  Q_ARG(Chess::Result, result));
 }
 
+void MainWindow::updateView() {
+    this->setStyleSheet("");
+    QFile styleFile("style.css");
+    if (styleFile.exists()) {
+        styleFile.open(QFile::ReadOnly);
+        QString styleSheet = styleFile.readAll();
+        this->setStyleSheet(styleSheet);
+    }
+}
+
 void MainWindow::processCapMsg(stCaptureMsg msg)
 {
 	// 得到当前的游戏？不是，应该得到当前的chessgame
@@ -1435,26 +1492,26 @@ void MainWindow::onLXchessboard()
 	//	int a = 0;
 	//}
 
-	//this->actLinkChessBoard = new QAction(this);
-	//this->actLinkChessBoard->setObjectName(QStringLiteral("LinkChessBoard"));
-	//QIcon iconLinkChessBoard;
-	//iconLinkChessBoard.addFile(QStringLiteral(":/icon/Links.ico"),
-	//	QSize(), QIcon::Normal, QIcon::Off);
-	//this->actLinkChessBoard->setIcon(iconLinkChessBoard);
-	//this->actLinkChessBoard->setText("连线");
-	//this->actLinkChessBoard->setToolTip("连接其它棋盘");
+	this->actLinkChessBoard = new QAction(this);
+	this->actLinkChessBoard->setObjectName(QStringLiteral("LinkChessBoard"));
+	QIcon iconLinkChessBoard;
+	iconLinkChessBoard.addFile(QStringLiteral(":/icon/Links.ico"),
+		QSize(), QIcon::Normal, QIcon::Off);
+	this->actLinkChessBoard->setIcon(iconLinkChessBoard);
+	this->actLinkChessBoard->setText("连线");
+	this->actLinkChessBoard->setToolTip("连接其它棋盘");
 
 	// 让引擎思考
-	//this->actEngineThink = new QAction(this);
-	//this->actEngineThink->setObjectName(QStringLiteral("EngineThink"));
+	this->actEngineThink = new QAction(this);
+	this->actEngineThink->setObjectName(QStringLiteral("EngineThink"));
 	QIcon iconEngineThink;
 	iconEngineThink.addFile(QStringLiteral(":/icon/thought-balloon.ico"),
 		QSize(), QIcon::Normal, QIcon::Off);
 	this->actLinkChessBoard->setIcon(iconEngineThink);
 
-	//this->actEngineThink->setIcon(iconEngineThink);
-	//this->actEngineThink->setText("思考");
-	//this->actEngineThink->setToolTip("让引擎思考当前棋局，并自动走棋");
+	this->actEngineThink->setIcon(iconEngineThink);
+	this->actEngineThink->setText("思考");
+	this->actEngineThink->setToolTip("让引擎思考当前棋局，并自动走棋");
 
 
 

@@ -236,6 +236,7 @@ void ChessGame::addPgnMove(const Chess::Move& move, const QString& comment)
 
 void ChessGame::emitLastMove()
 {
+	qDebug() << __FUNCSIG__;
 	int ply = m_moves.size() - 1;
 	if (m_scores.contains(ply))
 	{
@@ -250,6 +251,7 @@ void ChessGame::emitLastMove()
 
 void ChessGame::onMoveMade(const Chess::Move& move)
 {
+	qDebug() << __FUNCSIG__;
 	ChessPlayer* sender = qobject_cast<ChessPlayer*>(QObject::sender());
 	Q_ASSERT(sender != nullptr);
 
@@ -303,7 +305,7 @@ void ChessGame::startTurn()
 	Chess::Side side(m_board->sideToMove());
 	Q_ASSERT(!side.isNull());
 
-	emit humanEnabled(m_player[side]->isHuman());
+	//emit humanEnabled(m_player[side]->isHuman());
 
 	Chess::Move move(bookMove(side));
 	if (move.isNull())
@@ -363,6 +365,7 @@ void ChessGame::onResignation(const Chess::Result& result)
 
 void ChessGame::onResultClaim(const Chess::Result& result)
 {
+	qDebug() << __FUNCSIG__;
 	if (m_finished)
 		return;
 
@@ -779,6 +782,7 @@ void ChessGame::initializePgn()
 
 void ChessGame::startGame()
 {
+	qDebug() << __FUNCSIG__;
 	disconnect(this, SIGNAL(playersReady()), this, SLOT(startGame()));
 	if (m_finished)
 		return;

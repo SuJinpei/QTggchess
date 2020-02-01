@@ -212,6 +212,15 @@
     <ClCompile Include="src\capture.cpp">
       <Filter>Source Files\Capture</Filter>
     </ClCompile>
+    <ClCompile Include="TianTianPlayer.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TianTianPlayerBuilder.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TianTianConnector.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="src\autoverticalscroller.h">
@@ -372,6 +381,9 @@
     </QtMoc>
     <QtMoc Include="src\gamedatabasedlg.cpp">
       <Filter>Source Files\gameDatabase</Filter>
+    </QtMoc>
+    <QtMoc Include="TianTianConnector.h">
+      <Filter>Generated Files</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
@@ -550,6 +562,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="res\icons\resource.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TianTianPlayer.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TianTianPlayerBuilder.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

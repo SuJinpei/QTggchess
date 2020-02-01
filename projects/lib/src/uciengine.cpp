@@ -173,6 +173,7 @@ void UciEngine::endGame(const Chess::Result& result)
 
 void UciEngine::makeMove(const Chess::Move& move)
 {
+	qDebug() << __FUNCSIG__;
 	if (!m_ponderMove.isNull())
 	{
 		m_movesPondered++;
@@ -228,6 +229,7 @@ void UciEngine::makeBookMove(const Chess::Move& move)
 
 void UciEngine::startThinking()
 {
+	qDebug() << __FUNCSIG__;
 	if (m_ponderState == PonderHit)
 	{
 		m_ponderState = NotPondering;

@@ -70,6 +70,7 @@ class MainWindow : public QMainWindow
 		void closeCurrentGame();
 
 	private slots:
+		void newTianTianGame();
 		void newGame();
 		void OpenPgnGame();
 		void newTournament();
@@ -98,6 +99,7 @@ class MainWindow : public QMainWindow
 		void adjudicateWhiteWin();
 		void adjudicateBlackWin();
 		void resignGame();
+        void updateView();
 
 		void processCapMsg(stCaptureMsg msg);
 
@@ -159,6 +161,7 @@ class MainWindow : public QMainWindow
 		PgnTagsModel* m_tagsModel;
 
 		QAction* m_quitGameAct;
+		QAction* m_newTianTianGameAct;
 		QAction* m_newGameAct;
 		QAction* m_openPgnAct;             
 		QAction* m_adjudicateBlackWinAct;
@@ -172,6 +175,7 @@ class MainWindow : public QMainWindow
 		QAction* m_pasteFenAct;
 		QAction* m_copyPgnAct;
 		QAction* m_flipBoardAct;
+        QAction* m_updateView;
 		QAction* m_newTournamentAct;
 		QAction* m_stopTournamentAct;
 		QAction* m_showTournamentResultsAct;
